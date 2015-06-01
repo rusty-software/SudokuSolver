@@ -9,3 +9,22 @@ In any case, these puzzles are not worth doing.  However, I think it would be fu
 2. Feed the initial numbers into a solver and have it spit out the answers for me so I can use my fine-tipped Sharpie to fill in all the right numbers.
 
 So, here's my Sudoku Solver.  I'll keep a log in the commits on how it evolves.
+
+## Classes
+
+As it turns out, Sudoku has a set of terms for all of the concepts involved.  I was looking to find names for the classes dancing around in my head and, after a quick search, found them all listed on Wikipedia.  I'll be using the terms found here: http://en.wikipedia.org/wiki/Glossary_of_Sudoku#Grid_layout_and_puzzle_terms
+
+I'm going to start with things like:
+
+* Grid
+* Row
+* Column
+* Block
+* Cell
+
+I'm not using "square" for the reasons stated in the article, and I'm not using "box" since I'm doing C# here and "box" might be reserved in the Framework.
+
+## Starting simple
+
+I suspect there are some pretty standard algorithmic implementations for Sudoku.  However, I'd like to evolve the solution using tests and the approach I use to solve them by hand.  As a result, I'll be writing tests first (primarily), and starting with puzzles that I can easily solve at a glance.
+
