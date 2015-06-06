@@ -26,7 +26,7 @@ namespace SudokuSolver.Tests
             var cell = new Cell(1, 1, smallUnitSize, 3);
 
             Assert.AreEqual(1, cell.PossibleValues.Count());
-            Assert.AreEqual(3, cell.Given);
+            Assert.AreEqual(3, cell.PossibleValues.First());
         }
 
         [TestMethod]
@@ -52,21 +52,22 @@ namespace SudokuSolver.Tests
             Assert.AreEqual(3, cell14.BlockNum);
         }
 
-        //[TestMethod]
-        //public void Cells_AddingValue_RemovesUnitCellsPossibleValues()
-        //{
-        //    var expected = new List<int> { 2, 3, 4 };
-        //    var grid = new Grid(unitSize);
-        //    var cell = grid.CellAt(1, 1);
+        [TestMethod]
+        public void Cells_AddingValue_RemovesUnitCellsPossibleValues()
+        {
+            var expected = new List<int> { 2, 3, 4 };
+            var grid = new Grid(smallUnitSize);
+            var cell = grid.CellAt(1, 1);
 
-        //    cell.SetValue(1);
-        //    var unitCells = grid.UnitCellsFor(cell);
-        //    Assert.AreEqual(7, unitCells.Count());
-        //    foreach (var c in unitCells)
-        //    {
-        //        CollectionAssert.AreEquivalent(expected, c.PossibleValues);
-        //    }
-        //}
+            grid.SetValue(cell, 1);
+            var unitCells = grid.UnitCellsFor(cell);
+
+            Assert.AreEqual(7, unitCells.Count());
+            foreach (var c in unitCells)
+            {
+                CollectionAssert.AreEquivalent(expected, c.PossibleValues);
+            }
+        }
     }
 
     internal class Grid
@@ -98,6 +99,25 @@ namespace SudokuSolver.Tests
             // TODO: guard
             return Cells.Where(c => c.RowNum == row && c.ColNum == col).FirstOrDefault();
         }
+
+        public void SetValue(Cell cell, int value)
+        {
+            cell.SetValue(value);
+            foreach(var c in UnitCellsFor(cell))
+            {
+                c.RemovePossibleValue(value);
+            }
+        }
+
+        public List<Cell> UnitCellsFor(Cell cell)
+        {
+            var unitSharers = new List<Cell>();
+            unitSharers.AddRange(
+                Cells.Where(
+                    c => c != CellAt(cell.RowNum, cell.ColNum) 
+                         && (c.RowNum == cell.RowNum || c.ColNum == cell.ColNum || c.BlockNum == cell.BlockNum)));
+            return unitSharers;
+        }
     }
 
     internal class Cell
@@ -108,14 +128,6 @@ namespace SudokuSolver.Tests
         {
             return (int)Math.Sqrt(unitSize);
         }
-
-        public int Given { get; set; }
-
-        public List<int> PossibleValues { get; private set; }
-
-        public int RowNum { get; set; }
-
-        public int ColNum { get; set; }
 
         private int rowBlock()
         {
@@ -139,6 +151,22 @@ namespace SudokuSolver.Tests
             return (int)(Math.Sqrt(unitSize) - colBlock());
         }
 
+        public void SetValue(int value)
+        {
+            PossibleValues = new List<int> { value };
+        }
+
+        public void RemovePossibleValue(int value)
+        {
+            PossibleValues.Remove(value);
+        }
+
+        public List<int> PossibleValues { get; private set; }
+
+        public int RowNum { get; set; }
+
+        public int ColNum { get; set; }
+
         public int BlockNum
         {
             get
@@ -155,10 +183,9 @@ namespace SudokuSolver.Tests
             PossibleValues = Enumerable.Range(1, unitSize).ToList();
         }
 
-        public Cell(int rowNum, int colNum, int unitSize, int given) : this(rowNum, colNum, unitSize)
+        public Cell(int rowNum, int colNum, int unitSize, int value) : this(rowNum, colNum, unitSize)
         {
-            Given = given;
-            PossibleValues = new List<int> { Given };
+            PossibleValues = new List<int> { value };
         }
     }
 }
