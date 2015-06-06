@@ -52,6 +52,14 @@
   <ItemGroup>
     <Compile Include="AppTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CellTests.cs" />
+    <Compile Include="GridTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SudokuSolver.App\SudokuSolver.App.csproj">
+      <Project>{384c0cea-4047-4eaa-9930-4d4790aa54bf}</Project>
+      <Name>SudokuSolver.App</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
