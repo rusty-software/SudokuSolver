@@ -42,5 +42,30 @@ namespace SudokuSolver
             Assert.AreEqual(4, cell12.BlockNum);
             Assert.AreEqual(3, cell14.BlockNum);
         }
+
+        [TestMethod]
+        public void BlockNum_NineUnit_CalculatesCorrectly()
+        {
+            var nineUnit = 9;
+            var midBlock1 = new Cell(2, 2, nineUnit);
+            var midBlock2 = new Cell(2, 5, nineUnit);
+            var midBlock3 = new Cell(2, 8, nineUnit);
+            var midBlock4 = new Cell(5, 2, nineUnit);
+            var midBlock5 = new Cell(5, 5, nineUnit);
+            var midBlock6 = new Cell(5, 8, nineUnit);
+            var midBlock7 = new Cell(8, 2, nineUnit);
+            var midBlock8 = new Cell(8, 5, nineUnit);
+            var midBlock9 = new Cell(8, 8, nineUnit);
+
+            Assert.AreEqual(1, midBlock1.BlockNum);
+            Assert.AreEqual(2, midBlock2.BlockNum);
+            Assert.AreEqual(3, midBlock3.BlockNum);
+            Assert.AreEqual(4, midBlock4.BlockNum);
+            Assert.AreEqual(5, midBlock5.BlockNum);
+            Assert.AreEqual(6, midBlock6.BlockNum);
+            Assert.AreEqual(7, midBlock7.BlockNum);
+            Assert.AreEqual(8, midBlock8.BlockNum);
+            Assert.AreEqual(9, midBlock9.BlockNum);
+        }
     }
 }
