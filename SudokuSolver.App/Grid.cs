@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SudokuSolver.App
@@ -7,6 +8,7 @@ namespace SudokuSolver.App
     {
         private int unitSize;
         private List<Cell> givens;
+        private Array[] givens1;
 
         public List<Cell> Cells { get; set; }
 
@@ -18,13 +20,23 @@ namespace SudokuSolver.App
             }
         }
 
-        public Grid(int unitSize)
+        private void Init(int unitSize)
         {
             this.unitSize = unitSize;
             InitCells();
         }
 
+        public Grid(int unitSize)
+        {
+            Init(unitSize);
+        }
+
         public Grid(int unitSize, List<Cell> givens) : this(unitSize)
+        {
+            InitFromGivens(givens);
+        }
+
+        private void InitFromGivens(List<Cell> givens)
         {
             this.givens = givens;
             foreach (var given in givens)
@@ -33,6 +45,25 @@ namespace SudokuSolver.App
                 Cells[cellIndex] = given;
                 RemovePossibleValueSharedWith(given, given.PossibleValues.First());
             }
+        }
+
+        public Grid(int[][] gridRows) : this(gridRows.Length)
+        {
+            var givens = new List<Cell>();
+            var arrayLen = gridRows.Length;
+            for (var rowIndex = 0; rowIndex < arrayLen; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < arrayLen; colIndex++)
+                {
+                    var val = gridRows[rowIndex][colIndex];
+                    if (val != 0)
+                    {
+                        givens.Add(new Cell(rowIndex + 1, colIndex + 1, arrayLen, val));
+                    }
+                }
+            }
+
+            InitFromGivens(givens);
         }
 
         private void InitCells()
