@@ -8,16 +8,12 @@ namespace SudokuSolver.App
     {
         private int unitSize;
         private List<Cell> givens;
-        private Array[] givens1;
 
         public List<Cell> Cells { get; set; }
 
-        public bool IsSolved
+        public bool IsSolved(List<Cell> puzzle)
         {
-            get
-            {
-                return Cells.All(c => c.PossibleValues.Count() == 1);
-            }
+            return puzzle.All(c => c.PossibleValues.Count() == 1);
         }
 
         private void Init(int unitSize)
@@ -29,22 +25,6 @@ namespace SudokuSolver.App
         public Grid(int unitSize)
         {
             Init(unitSize);
-        }
-
-        public Grid(int unitSize, List<Cell> givens) : this(unitSize)
-        {
-            InitFromGivens(givens);
-        }
-
-        private void InitFromGivens(List<Cell> givens)
-        {
-            this.givens = givens;
-            foreach (var given in givens)
-            {
-                var cellIndex = Cells.FindIndex(c => c.RowNum == given.RowNum && c.ColNum == given.ColNum);
-                Cells[cellIndex] = given;
-                RemovePossibleValueSharedWith(given, given.PossibleValues.First());
-            }
         }
 
         public Grid(int[][] gridRows) : this(gridRows.Length)
@@ -66,6 +46,22 @@ namespace SudokuSolver.App
             InitFromGivens(givens);
         }
 
+        private void InitFromGivens(List<Cell> givens)
+        {
+            this.givens = givens;
+            foreach (var given in givens)
+            {
+                var cellIndex = Cells.FindIndex(c => c.RowNum == given.RowNum && c.ColNum == given.ColNum);
+                Cells[cellIndex] = given;
+                RemovePossibleValueSharedWith(Cells, given, given.PossibleValues.First());
+            }
+
+            if (!IsSolved(Cells))
+            {
+                Solve(Cells);
+            }
+        }
+
         private void InitCells()
         {
             Cells = new List<Cell>();
@@ -83,38 +79,48 @@ namespace SudokuSolver.App
             return Cells.Where(c => c.RowNum == row && c.ColNum == col).FirstOrDefault();
         }
 
-        public void SetValue(Cell cell, int value)
+        private void RemovePossibleValueSharedWith(List<Cell> puzzle, Cell cell, int value)
         {
-            cell.SetValue(value);
-            RemovePossibleValueSharedWith(cell, value);
-        }
-
-        private void RemovePossibleValueSharedWith(Cell cell, int value)
-        {
-            var unsolvedCells = UnitCellsFor(cell).Where(c => c.PossibleValues.Count() > 1).ToList();
+            var unsolvedCells = UnitCellsFor(puzzle, cell).Where(c => c.PossibleValues.Count() > 1).ToList();
             foreach (var c in unsolvedCells)
             {
                 c.RemovePossibleValue(value);
                 if (c.PossibleValues.Count() == 1)
                 {
-                    RemovePossibleValueSharedWith(c, c.PossibleValues.First());
+                    RemovePossibleValueSharedWith(puzzle, c, c.PossibleValues.First());
                 }
             }
         }
 
-        public List<Cell> UnitCellsFor(Cell cell)
+        public List<Cell> UnitCellsFor(List<Cell> puzzle, Cell cell)
         {
+            var ident = puzzle.First(c => c.RowNum == cell.RowNum && c.ColNum == cell.ColNum);
             var unitSharers = new List<Cell>();
             unitSharers.AddRange(
-                Cells.Where(
-                    c => c != CellAt(cell.RowNum, cell.ColNum)
+                puzzle.Where(
+                    c => c != ident
                          && (c.RowNum == cell.RowNum || c.ColNum == cell.ColNum || c.BlockNum == cell.BlockNum)));
             return unitSharers;
         }
 
-        public void Solve()
+        public List<Cell> Solve(List<Cell> puzzle)
         {
+            var copy = puzzle.ConvertAll(c => new Cell(c.RowNum, c.ColNum, puzzle.Count()));
+            var minPossibleValueCount = puzzle.Where(c => c.PossibleValues.Count() > 1).Min(c => c.PossibleValues.Count());
+            var unsolvedCell = puzzle.First(c => c.PossibleValues.Count() == minPossibleValueCount);
+            var index = puzzle.FindIndex(c => c.RowNum == unsolvedCell.RowNum && c.ColNum == unsolvedCell.ColNum);
+            foreach (var possibleValue in unsolvedCell.PossibleValues)
+            {
+                unsolvedCell.SetValue(possibleValue);
+                copy[index] = unsolvedCell;
+                RemovePossibleValueSharedWith(copy, unsolvedCell, unsolvedCell.PossibleValues.First());
+                if (IsSolved(copy))
+                {
+                    return copy;
+                }
+            }
 
+            return Solve(copy);
         }
     }
 }
